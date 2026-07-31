@@ -1,35 +1,21 @@
 "use client";
 
 // Tutorial interactiu: mostra lliçons amb una posició preparada i valida la
-// jugada de l'aprenent amb el mateix motor de regles del joc.
+// jugada de l'aprenent amb el mateix motor de regles del joc. Textos localitzats.
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import GoBoard from "./GoBoard";
-import {
-  GameState,
-  buildPosition,
-  groupAt,
-  idx,
-  play,
-} from "@/lib/go/board";
+import { GameState, buildPosition, groupAt, idx, play } from "@/lib/go/board";
 import { pointToVertex } from "@/lib/go/vertex";
 import { opponent, Player } from "@/lib/go/types";
 import { LESSONS, Lesson } from "@/lib/go/lessons";
+import { useI18n } from "@/lib/i18n";
 
 const SIZE = 9;
-// A totes les lliçons l'aprenent juga amb negres.
-const LEARNER: Player = "black";
+const LEARNER: Player = "black"; // a totes les lliçons l'aprenent juga negres
 
 type Feedback = { kind: "success" | "error"; text: string } | null;
-
-const reasonMessage = (reason: string): string => {
-  if (reason === "occupied") return "Aquí ja hi ha una pedra.";
-  if (reason === "ko") return "Prohibit pel ko: no pots recapturar de seguida.";
-  if (reason === "suicide")
-    return "Això seria suïcidi: la teva pedra quedaria sense llibertats.";
-  return "Aquesta jugada no és possible aquí.";
-};
 
 const countStones = (state: GameState, color: Player): number =>
   state.grid.filter((c) => c === color).length;
@@ -42,7 +28,6 @@ const hasGroupInAtari = (state: GameState, color: Player): boolean => {
   return false;
 };
 
-// Nombre de cadenes diferents d'un color que estan en atari (1 llibertat).
 const countGroupsInAtari = (state: GameState, color: Player): number => {
   const seen = new Set<number>();
   let count = 0;
@@ -71,6 +56,7 @@ const goalMet = (
 };
 
 export default function Tutorial() {
+  const { t, lang } = useI18n();
   const [index, setIndex] = useState(0);
   const lesson = LESSONS[index];
 
@@ -88,12 +74,19 @@ export default function Tutorial() {
     setFeedback(null);
   }, [base]);
 
+  const reasonText = (reason: string): string => {
+    if (reason === "occupied") return t("reasonOccupied");
+    if (reason === "ko") return t("reasonKo");
+    if (reason === "suicide") return t("reasonSuicide");
+    return t("reasonOther");
+  };
+
   const handlePlay = (row: number, col: number) => {
     if (solved) return;
     const vertex = pointToVertex(SIZE, { row, col });
 
     if (lesson.avoid && lesson.avoid.vertex === vertex) {
-      setFeedback({ kind: "error", text: lesson.avoid.message });
+      setFeedback({ kind: "error", text: lesson.avoid.message[lang] });
       return;
     }
 
@@ -101,11 +94,11 @@ export default function Tutorial() {
     if (goalMet(lesson, board, next, vertex)) {
       setBoard(next);
       setSolved(true);
-      setFeedback({ kind: "success", text: lesson.success });
+      setFeedback({ kind: "success", text: lesson.success[lang] });
     } else {
       setFeedback({
         kind: "error",
-        text: lesson.wrong || "Aquesta no és la jugada. Torna-ho a provar.",
+        text: lesson.wrong ? lesson.wrong[lang] : t("wrongDefault"),
       });
     }
   };
@@ -127,7 +120,7 @@ export default function Tutorial() {
           humanPlayer={LEARNER}
           onPlay={handlePlay}
           onIllegal={(reason) =>
-            setFeedback({ kind: "error", text: reasonMessage(reason) })
+            setFeedback({ kind: "error", text: reasonText(reason) })
           }
         />
       </div>
@@ -135,19 +128,19 @@ export default function Tutorial() {
       <aside className="tutorial-panel panel">
         <div className="tutorial-top">
           <Link href="/" className="tutorial-back">
-            ← Tornar al joc
+            ← {t("tutBack")}
           </Link>
           <span className="tutorial-progress">
-            Lliçó {index + 1} de {LESSONS.length}
+            {t("tutProgress", { n: index + 1, total: LESSONS.length })}
           </span>
         </div>
 
-        <h1 className="tutorial-title">{lesson.title}</h1>
-        <p className="tutorial-intro">{lesson.intro}</p>
+        <h1 className="tutorial-title">{lesson.title[lang]}</h1>
+        <p className="tutorial-intro">{lesson.intro[lang]}</p>
 
         <div className="tutorial-task">
-          <span className="tutorial-task-label">La teva tasca</span>
-          {lesson.task}
+          <span className="tutorial-task-label">{t("tutTask")}</span>
+          {lesson.task[lang]}
         </div>
 
         {feedback && (
@@ -162,17 +155,17 @@ export default function Tutorial() {
             onClick={() => setIndex((i) => Math.max(0, i - 1))}
             disabled={index === 0}
           >
-            Anterior
+            {t("tutPrev")}
           </button>
           <button className="btn" onClick={retry}>
-            Reintentar
+            {t("tutRetry")}
           </button>
           <button
             className="btn btn-primary"
             onClick={() => setIndex((i) => Math.min(LESSONS.length - 1, i + 1))}
             disabled={isLast}
           >
-            {solved ? "Següent →" : "Ometre →"}
+            {solved ? t("tutNext") : t("tutSkip")}
           </button>
         </div>
       </aside>

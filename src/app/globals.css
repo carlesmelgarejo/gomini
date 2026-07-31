@@ -1,9 +1,9 @@
 /* Tema fosc (per defecte) */
 :root {
-  --bg: #17130f;
-  --glow-1: #3a2c1a;
-  --glow-2: #2a2016;
-  --panel: rgba(38, 30, 22, 0.72);
+  --bg: #012938;
+  --glow-1: #1a303a;
+  --glow-2: #16212a;
+  --panel: rgba(22, 30, 38, 0.72);
   --panel-border: rgba(226, 189, 119, 0.18);
   --text: #f3ead9;
   --text-dim: #b7a888;
@@ -22,38 +22,78 @@
   --board-line: #3a2a12;
 }
 
-/* Tema clar */
-[data-theme="light"] {
-  --bg: #f4ead8;
-  --glow-1: #fbe9c6;
-  --glow-2: #f0dcbb;
-  --panel: rgba(255, 252, 245, 0.82);
-  --panel-border: rgba(150, 110, 50, 0.22);
-  --text: #3a2c17;
-  --text-dim: #8a744f;
-  --accent: #c8912f;
-  --accent-strong: #a9772f;
-  --surface-soft: rgba(120, 85, 30, 0.06);
-  --surface-soft-2: rgba(120, 85, 30, 0.12);
-  --surface-border: rgba(120, 85, 30, 0.18);
-  --shadow: 0 20px 48px rgba(120, 90, 40, 0.28);
+.learn-btn:hover {
+  opacity: 0.9;
+}
 
-  --wood-1: #f7e6bf;
-  --wood-2: #ecca8c;
-  --wood-3: #d9ad63;
-  --wood-frame: #b98a44;
-  --board-line: #4a3416;
+/* Tema clar — versió lluminosa del mateix món (blau petroli + daurat) */
+[data-theme="light"] {
+  --bg: #e8f1f2;
+  --glow-1: #d6e8ea;
+  --glow-2: #cfe1e4;
+  --panel: rgba(240, 247, 248, 0.85);
+  --panel-border: rgba(1, 41, 56, 0.16);
+  --text: #0e2e3b;
+  --text-dim: #587683;
+  --accent: #012938;
+  --accent-strong: #012938;
+  --surface-soft: rgba(1, 41, 56, 0.05);
+  --surface-soft-2: rgba(1, 41, 56, 0.1);
+  --surface-border: rgba(1, 41, 56, 0.14);
+  --shadow: 0 20px 48px rgba(1, 41, 56, 0.18);
+
+  /* Mateixa fusta que el tema fosc, perquè el tauler es vegi igual */
+  --wood-1: #f0d69b;
+  --wood-2: #e3bd77;
+  --wood-3: #cf9f52;
+  --wood-frame: #a9772f;
+  --board-line: #3a2a12;
 }
 
 * {
   box-sizing: border-box;
 }
 
-.theme-toggle {
+/* Tema clar: sobre l'accent petroli, el text va en blanc perquè es llegeixi. */
+[data-theme="light"] .chip-on,
+[data-theme="light"] .btn-primary {
+  color: #fff;
+}
+
+[data-theme="light"] .btn-primary:hover:not(:disabled) {
+  background: linear-gradient(120deg, #012938, var(--accent-strong));
+}
+
+.top-controls {
   position: fixed;
   top: 18px;
   right: 18px;
-  z-index: 50;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.lang-select {
+  height: 44px;
+  padding: 0 12px;
+  border-radius: 22px;
+  border: 1px solid var(--panel-border);
+  background: var(--panel);
+  backdrop-filter: blur(10px);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+}
+
+.lang-select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.theme-toggle {
   width: 44px;
   height: 44px;
   border-radius: 50%;
@@ -66,7 +106,9 @@
   display: grid;
   place-items: center;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
-  transition: transform 0.12s ease, box-shadow 0.18s ease;
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.18s ease;
 }
 
 .theme-toggle:hover {
@@ -82,13 +124,24 @@ body {
 
 body {
   background:
-    radial-gradient(1200px 700px at 20% -10%, var(--glow-1) 0%, transparent 60%),
+    radial-gradient(
+      1200px 700px at 20% -10%,
+      var(--glow-1) 0%,
+      transparent 60%
+    ),
     radial-gradient(900px 600px at 110% 20%, var(--glow-2) 0%, transparent 55%),
     var(--bg);
   color: var(--text);
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
   -webkit-font-smoothing: antialiased;
-  transition: background 0.3s ease, color 0.3s ease;
+  transition:
+    background 0.3s ease,
+    color 0.3s ease;
 }
 
 .page {
@@ -162,14 +215,46 @@ body {
 }
 
 /* ---------- Panell ---------- */
-.panel {
+/* Contenidor relatiu sense filtre: ancora el botó "Aprendre" sense que el
+   backdrop-filter del panell el retalli en sobresortir. */
+.panel-wrap {
+  position: relative;
   width: min(92vw, 320px);
+  overflow: visible;
+}
+
+.panel {
+  width: 100%;
   background: var(--panel);
   backdrop-filter: blur(14px);
   border: 1px solid var(--panel-border);
   border-radius: 20px;
   padding: 26px 24px;
   box-shadow: var(--shadow);
+}
+
+/* Botó rodó "Aprendre", a dalt a la dreta i fora del panell */
+.panel-wrap .learn-btn {
+  position: absolute;
+  top: -58px;
+  right: 0;
+  z-index: 5;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(120deg, var(--accent-strong), var(--accent));
+  color: #2a1f10;
+  border: 1px solid var(--panel-border);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.18s ease;
+}
+
+[data-theme="light"] .learn-btn {
+  color: #fff;
 }
 
 .panel-header h1 {
@@ -180,6 +265,10 @@ body {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+
+.panel-header h1 span {
+  color: #a9772f;
 }
 
 .subtitle {
@@ -265,8 +354,13 @@ body {
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 /* ---------- Dificultat ---------- */
@@ -298,7 +392,9 @@ body {
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .chip:not(.chip-on):hover {
@@ -326,7 +422,7 @@ body {
   max-width: 70vw;
   padding: 9px 12px;
   border-radius: 10px;
-  background: rgba(28, 22, 14, 0.97);
+  background: rgb(9, 19, 24);
   color: #f3ead9;
   border: 1px solid rgba(227, 189, 119, 0.28);
   font-size: 12.5px;
@@ -346,9 +442,20 @@ body {
   left: 50%;
   transform: translateX(-50%);
   border: 6px solid transparent;
-  border-top-color: rgba(28, 22, 14, 0.97);
+  border-top-color: rgb(9, 19, 24);
   z-index: 60;
   pointer-events: none;
+}
+
+/* Tooltip en tema clar */
+[data-theme="light"] [data-tip]:hover::after {
+  background: rgb(217, 224, 225);
+  color: #012938;
+  border-color: rgba(1, 41, 56, 0.2);
+}
+
+[data-theme="light"] [data-tip]:hover::before {
+  border-top-color: rgb(217, 224, 225);
 }
 
 .turn {
@@ -453,7 +560,11 @@ body {
   padding: 16px;
   margin-bottom: 18px;
   border-radius: 14px;
-  background: linear-gradient(135deg, rgba(227, 189, 119, 0.16), rgba(227, 189, 119, 0.06));
+  background: linear-gradient(
+    135deg,
+    rgba(227, 189, 119, 0.16),
+    rgba(227, 189, 119, 0.06)
+  );
   border: 1px solid rgba(227, 189, 119, 0.3);
 }
 
@@ -488,8 +599,13 @@ body {
 }
 
 @keyframes hintPulse {
-  0%, 100% { opacity: 0.45; }
-  50% { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 .hintbox {
@@ -552,7 +668,10 @@ body {
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.08s ease, background 0.15s ease, opacity 0.15s ease;
+  transition:
+    transform 0.08s ease,
+    background 0.15s ease,
+    opacity 0.15s ease;
 }
 
 .btn:hover:not(:disabled) {
@@ -585,51 +704,6 @@ body {
   font-size: 12.5px;
   color: var(--text-dim);
   line-height: 1.5;
-}
-
-.learn-link {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 14px;
-  margin-bottom: 6px;
-  font-size: 14.5px;
-  font-weight: 600;
-  color: var(--text);
-  text-decoration: none;
-  border: 1px solid rgba(227, 189, 119, 0.4);
-  border-radius: 12px;
-  padding: 11px 14px;
-  background: linear-gradient(
-    120deg,
-    rgba(227, 189, 119, 0.16),
-    rgba(227, 189, 119, 0.05)
-  );
-  transition: transform 0.08s ease, box-shadow 0.18s ease, border-color 0.18s ease;
-}
-
-.learn-link:hover {
-  transform: translateY(-1px);
-  border-color: var(--accent);
-  box-shadow: 0 6px 18px rgba(227, 189, 119, 0.18);
-}
-
-.learn-link .learn-icon {
-  width: 30px;
-  height: 30px;
-  display: grid;
-  place-items: center;
-  border-radius: 9px;
-  background: linear-gradient(120deg, var(--accent-strong), var(--accent));
-  color: #2a1f10;
-  font-size: 16px;
-  flex: 0 0 auto;
-}
-
-.learn-link .learn-arrow {
-  margin-left: auto;
-  color: var(--accent-strong);
-  font-size: 18px;
 }
 
 /* ---------- Tutorial ---------- */
@@ -742,12 +816,179 @@ body {
   grid-column: 1 / -1;
 }
 
-@media (max-width: 760px) {
+/* ---------- Mòbil ---------- */
+.mobile-game {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 12px 28px;
+}
+
+.mobile-topbar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 46px;
+}
+
+.mobile-title {
+  flex: 1;
+  text-align: center;
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  background: linear-gradient(120deg, var(--accent-strong), var(--accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.mobile-title span {
+  color: #a9772f;
+}
+
+/* Reserva l'espai dels controls fixos (idioma/tema) a la dreta de la barra */
+.topbar-spacer {
+  width: 150px;
+  flex: 0 0 auto;
+}
+
+.icon-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: var(--surface-soft);
+  border: 1px solid var(--surface-border);
+  color: var(--text);
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.mobile-actions {
+  width: min(96vw, 560px);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.mobile-turn-slot {
+  flex: 1;
+  min-width: 0;
+}
+
+.mobile-turn-slot .turn {
+  margin-bottom: 0;
+}
+
+.mobile-result {
+  width: min(96vw, 560px);
+  margin-bottom: 0;
+}
+
+.round-actions {
+  display: flex;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.round-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(120deg, var(--accent-strong), var(--accent));
+  color: #2a1f10;
+  border: 1px solid var(--panel-border);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.round-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+[data-theme="light"] .round-btn {
+  color: #fff;
+}
+
+.mobile-game .captures-bar,
+.mobile-game .board-actions,
+.mobile-game .board-wrap {
+  width: min(96vw, 560px);
+}
+
+/* Calaix de configuració (drawer) */
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 80;
+  width: min(86vw, 340px);
+  background: var(--bg);
+  border-right: 1px solid var(--panel-border);
+  box-shadow: var(--shadow);
+  padding: 20px 18px;
+  overflow-y: auto;
+  transform: translateX(-100%);
+  transition: transform 0.25s ease;
+}
+
+.drawer-open {
+  transform: translateX(0);
+}
+
+.drawer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.drawer-head strong {
+  font-size: 15px;
+}
+
+/* En pantalles no prou amples, el contingut podria xocar amb els controls fixos
+   (idioma/tema) del cantó superior dret: hi deixem prou marge a dalt. */
+@media (max-width: 1340px) and (min-width: 968px) {
+  .page,
+  .tutorial {
+    align-items: flex-start;
+    padding-top: 124px;
+  }
+}
+
+@media (max-width: 967px) {
   .page,
   .tutorial {
     flex-direction: column;
     align-items: center;
     gap: 24px;
-    padding: 24px 16px;
+    padding: 80px 16px 24px;
+  }
+  /* Al tutorial en mòbil, primer el panell (explicació) i després el tauler. */
+  .tutorial-panel {
+    order: 1;
+  }
+  .tutorial-board {
+    order: 2;
   }
 }

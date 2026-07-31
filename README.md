@@ -10,6 +10,7 @@ Web app per jugar al **Go en tauler petit (7×7 i 9×9) contra KataGo**. Feta am
 - **Compte per àrea** (estil xinès) amb komi segons la mida al final de la partida.
 - **Selector d'oponent**: bot ràpid (instantani, sense càrrega) o KataGo (sota demanda).
 - **Tema clar/fosc** i partida que **es desa i es reprèn** després d'un refresc.
+- **Trilingüe** (català, castellà, anglès) amb selector d'idioma; i18n propi sense llibreries (`src/lib/i18n.tsx`), textos de les lliçons localitzats a `lessons.ts`.
 - Oponent **KataGo** amb **dificultat ajustable** (Fàcil / Mitjà / Difícil → menys o més *visits*).
 - **Bot heurístic de reserva**: si KataGo no està configurat o no respon, l'app segueix jugable amb un oponent senzill en TypeScript. Quan KataGo hi és, mana ell.
 - **Botó de pista**: ressalta al tauler la millor jugada segons KataGo i mostra la seva valoració (probabilitat de guanyar, punts esperats i seqüència prevista).

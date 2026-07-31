@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import ThemeToggle from "@/components/ThemeToggle";
+import LanguageSelector from "@/components/LanguageSelector";
+import { I18nProvider } from "@/lib/i18n";
 
 export const metadata: Metadata = {
   title: "GoMini — go.elclic.net",
@@ -35,8 +37,13 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body>
-        <ThemeToggle />
-        {children}
+        <I18nProvider>
+          <div className="top-controls">
+            <LanguageSelector />
+            <ThemeToggle />
+          </div>
+          {children}
+        </I18nProvider>
       </body>
     </html>
   );

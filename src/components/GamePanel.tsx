@@ -1,158 +1,170 @@
 "use client";
 
-// Panell lateral: qui mou, pedres capturades, estat de la màquina, controls i
-// resultat final quan la partida acaba.
+// Panell lateral: mida, oponent, motor, dificultat, resultat, controls i pista.
 
 import Link from "next/link";
-import { GoGame, EngineStatus, BOARD_SIZES } from "@/hooks/useGoGame";
+import { GoGame, BOARD_SIZES } from "@/hooks/useGoGame";
 import { Player } from "@/lib/go/types";
 import { Difficulty } from "@/lib/go/remoteEngine";
 import { pointToVertex } from "@/lib/go/vertex";
-
-const label = (p: Player) => (p === "black" ? "Negres" : "Blanques");
+import { useI18n } from "@/lib/i18n";
 
 const DIFFICULTIES: { key: Difficulty; label: string }[] = [
-  { key: "easy", label: "Fàcil" },
-  { key: "medium", label: "Mitjà" },
-  { key: "hard", label: "Difícil" },
+  { key: "easy", label: "easy" },
+  { key: "medium", label: "medium" },
+  { key: "hard", label: "hard" },
 ];
 
-const ENGINE_BADGE: Record<EngineStatus, { text: string; cls: string }> = {
-  checking: { text: "Comprovant KataGo…", cls: "engine-checking" },
-  katago: { text: "KataGo (motor de Go)", cls: "engine-katago" },
-  fallback: { text: "Bot heurístic (reserva)", cls: "engine-fallback" },
-};
-
 export default function GamePanel({ game }: { game: GoGame }) {
+  const { t } = useI18n();
   const { humanPlayer, score, canUndo } = game;
-  const botPlayer: Player = humanPlayer === "black" ? "white" : "black";
   const isFast = game.opponentMode === "fast";
+  const colorName = t(humanPlayer === "black" ? "black" : "white");
 
-  const badge = isFast
-    ? { text: "Bot ràpid (instantani)", cls: "engine-fast" }
-    : ENGINE_BADGE[game.engineStatus];
+  const badgeText = isFast
+    ? t("badgeFast")
+    : game.engineStatus === "checking"
+      ? t("badgeChecking")
+      : game.engineStatus === "katago"
+        ? t("badgeKatago")
+        : t("badgeFallback");
+  const badgeCls = isFast ? "engine-fast" : `engine-${game.engineStatus}`;
 
   return (
-    <aside className="panel">
-      <div className="panel-header">
-        <h1>GoMini</h1>
-        <p className="subtitle">Tu ({label(humanPlayer)}) contra la màquina</p>
-        <Link href="/aprendre" className="learn-link">
-          <span className="learn-icon">📖</span>
-          Aprendre a jugar
-          <span className="learn-arrow">→</span>
-        </Link>
-      </div>
-
-      <div className="difficulty opponent-block">
-        <span className="difficulty-label">Tauler</span>
-        <div className="difficulty-options opponent-options">
-          {BOARD_SIZES.map((n) => (
-            <button
-              key={n}
-              className={`chip ${game.size === n ? "chip-on" : ""}`}
-              onClick={() => game.setSize(n)}
-            >
-              {n}×{n}
-            </button>
-          ))}
+    <div className="panel-wrap">
+      <Link href="/aprendre" className="learn-btn" data-tip={t("learn")}>
+        <svg
+          viewBox="0 0 24 24"
+          width="24"
+          height="24"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3 1 9l11 6 9-4.91V17h2V9L12 3z" />
+        </svg>
+      </Link>
+      <aside className="panel">
+        <div className="panel-header">
+          <h1>
+            Go<span>Mini</span>
+          </h1>
+          <p className="subtitle">{t("subtitle", { color: colorName })}</p>
         </div>
-      </div>
 
-      <div className="difficulty opponent-block">
-        <span className="difficulty-label">Oponent</span>
-        <div className="difficulty-options opponent-options">
-          <button
-            className={`chip ${isFast ? "chip-on" : ""}`}
-            onClick={() => game.setOpponentMode("fast")}
-            data-tip="Oponent senzill integrat a l'app: respon a l'instant i no consumeix recursos. Nivell principiant."
-          >
-            Bot ràpid
-          </button>
-          <button
-            className={`chip ${!isFast ? "chip-on" : ""}`}
-            onClick={() => game.setOpponentMode("katago")}
-            data-tip="Motor de Go professional (IA). Juga molt fort, amb dificultat ajustable. S'engega sota demanda."
-          >
-            KataGo
-          </button>
-        </div>
-      </div>
-
-      <div className={`engine-badge ${badge.cls}`}>
-        <span className="engine-dot" />
-        <div>
-          <span className="engine-caption">Jugant amb</span>
-          <span className="engine-name">{badge.text}</span>
-        </div>
-      </div>
-
-      {!isFast && (
-        <div className="difficulty">
-          <span className="difficulty-label">Dificultat (KataGo)</span>
-          <div className="difficulty-options">
-            {DIFFICULTIES.map((d) => (
+        <div className="difficulty opponent-block">
+          <span className="difficulty-label">{t("board")}</span>
+          <div className="difficulty-options opponent-options">
+            {BOARD_SIZES.map((n) => (
               <button
-                key={d.key}
-                className={`chip ${game.difficulty === d.key ? "chip-on" : ""}`}
-                onClick={() => game.setDifficulty(d.key)}
+                key={n}
+                className={`chip ${game.size === n ? "chip-on" : ""}`}
+                onClick={() => game.setSize(n)}
               >
-                {d.label}
+                {n}×{n}
               </button>
             ))}
           </div>
         </div>
-      )}
 
-      <TurnIndicator game={game} botPlayer={botPlayer} />
-
-      {score && (
-        <div className="result">
-          <h2>Fi de la partida</h2>
-          <p className="result-winner">
-            Guanyen les {label(score.winner)}
-          </p>
-          <p className="result-detail">
-            Negres {score.black} · Blanques {score.white.toFixed(1)}{" "}
-            <span className="komi">(komi {score.komi})</span>
-          </p>
-          <p className="result-detail">Marge: {score.margin.toFixed(1)} punts</p>
+        <div className="difficulty opponent-block">
+          <span className="difficulty-label">{t("opponent")}</span>
+          <div className="difficulty-options opponent-options">
+            <button
+              className={`chip ${isFast ? "chip-on" : ""}`}
+              onClick={() => game.setOpponentMode("fast")}
+              data-tip={t("tipFast")}
+            >
+              {t("fastBot")}
+            </button>
+            <button
+              className={`chip ${!isFast ? "chip-on" : ""}`}
+              onClick={() => game.setOpponentMode("katago")}
+              data-tip={t("tipKata")}
+            >
+              KataGo
+            </button>
+          </div>
         </div>
-      )}
 
-      <HintBox game={game} />
+        <div className={`engine-badge ${badgeCls}`}>
+          <span className="engine-dot" />
+          <div>
+            <span className="engine-caption">{t("playingWith")}</span>
+            <span className="engine-name">{badgeText}</span>
+          </div>
+        </div>
 
-      <div className="controls">
-        <button
-          className="btn"
-          onClick={game.requestHint}
-          disabled={!game.isHumanTurn || game.hintLoading}
-        >
-          {game.hintLoading ? "Pensant la pista…" : "Pista"}
-        </button>
-        <button className="btn btn-ghost" onClick={game.newGame}>
-          Nova partida
-        </button>
-      </div>
+        {!isFast && (
+          <div className="difficulty">
+            <span className="difficulty-label">{t("difficultyKatago")}</span>
+            <div className="difficulty-options">
+              {DIFFICULTIES.map((d) => (
+                <button
+                  key={d.key}
+                  className={`chip ${game.difficulty === d.key ? "chip-on" : ""}`}
+                  onClick={() => game.setDifficulty(d.key)}
+                >
+                  {t(d.label)}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
-      <p className="hint">
-        Dues passades seguides acaben la partida i es compta el territori.
-      </p>
-    </aside>
+        <TurnIndicator game={game} />
+
+        {score && (
+          <div className="result">
+            <h2>{t("resultTitle")}</h2>
+            <p className="result-winner">
+              {t("resultWinner", { color: t(score.winner) })}
+            </p>
+            <p className="result-detail">
+              {t("resultDetail", {
+                black: score.black,
+                white: score.white.toFixed(1),
+                komi: score.komi,
+              })}
+            </p>
+            <p className="result-detail">
+              {t("margin", { margin: score.margin.toFixed(1) })}
+            </p>
+          </div>
+        )}
+
+        <HintBox game={game} />
+
+        <div className="controls">
+          <button
+            className="btn"
+            onClick={game.requestHint}
+            disabled={!game.isHumanTurn || game.hintLoading}
+          >
+            {game.hintLoading ? t("hintThinking") : t("hint")}
+          </button>
+          <button className="btn btn-ghost" onClick={game.newGame}>
+            {t("newGame")}
+          </button>
+        </div>
+
+        <p className="hint">{t("hintNote")}</p>
+      </aside>
+    </div>
   );
 }
 
 function HintBox({ game }: { game: GoGame }) {
+  const { t } = useI18n();
   const { hint, state } = game;
   if (!hint) return null;
 
-  const move = hint.point ? pointToVertex(state.size, hint.point) : "passar";
+  const move = hint.point ? pointToVertex(state.size, hint.point) : t("pass");
   const winPct = Math.round(hint.winrate * 100);
   const lead = hint.scoreLead;
   const leadText =
     lead >= 0
-      ? `vas +${lead.toFixed(1)} punts`
-      : `vas ${lead.toFixed(1)} punts`;
+      ? t("leadPlus", { n: lead.toFixed(1) })
+      : t("leadMinus", { n: lead.toFixed(1) });
   const sequence = hint.sequence
     .slice(0, 5)
     .map((p) => pointToVertex(state.size, p))
@@ -161,45 +173,61 @@ function HintBox({ game }: { game: GoGame }) {
   return (
     <div className="hintbox">
       <div className="hintbox-move">
-        Jugada recomanada: <strong>{move}</strong>
-        <span className="hintbox-badge">verd al tauler</span>
+        {t("recommended")}: <strong>{move}</strong>
+        <span className="hintbox-badge">{t("onBoardGreen")}</span>
       </div>
       <div className="hintbox-stats">
-        <span>Guanyar: <strong>{winPct}%</strong></span>
+        <span>
+          {t("win")}: <strong>{winPct}%</strong>
+        </span>
         <span>{leadText}</span>
       </div>
       {sequence && (
         <div className="hintbox-seq">
-          Seqüència prevista: {sequence}
+          {t("sequence")}: {sequence}
         </div>
       )}
     </div>
   );
 }
 
-function TurnIndicator({
+export function TurnIndicator({
   game,
-  botPlayer,
+  compact = false,
 }: {
   game: GoGame;
-  botPlayer: Player;
+  compact?: boolean;
 }) {
-  const { state, thinking } = game;
+  const { t } = useI18n();
+  const { state, thinking, humanPlayer, hintLoading } = game;
+
   if (state.ended) {
-    return <div className="turn turn-ended">Partida acabada</div>;
-  }
-  if (thinking) {
     return (
-      <div className="turn turn-bot">
-        <span className="spinner" /> La màquina està pensant…
+      <div className="turn turn-ended">
+        <span>{t("ended")}</span>
       </div>
     );
   }
-  const yourTurn = state.toMove === game.humanPlayer;
+
+  const yourTurn = state.toMove === humanPlayer;
+  // "Pensant" mentre mou la màquina o mentre es calcula una pista.
+  const showThinking = hintLoading || (thinking && !yourTurn);
+  if (showThinking) {
+    return (
+      <div className="turn turn-bot">
+        <span className="spinner" />{" "}
+        <span>{t(compact ? "thinkingShort" : "thinking")}</span>
+      </div>
+    );
+  }
+
+  const dotColor: Player = state.toMove;
   return (
     <div className={`turn ${yourTurn ? "turn-you" : "turn-bot"}`}>
-      <span className={`dot ${state.toMove === "black" ? "dot-black" : "dot-white"}`} />
-      {yourTurn ? "És el teu torn" : "Torn de la màquina"}
+      <span
+        className={`dot ${dotColor === "black" ? "dot-black" : "dot-white"}`}
+      />
+      <span>{yourTurn ? t("turnYou") : t("turnBot")}</span>
     </div>
   );
 }

@@ -2,10 +2,19 @@
 
 import GoBoard from "@/components/GoBoard";
 import GamePanel from "@/components/GamePanel";
+import MobileGame from "@/components/MobileGame";
 import { useGoGame } from "@/hooks/useGoGame";
+import { useIsMobile } from "@/hooks/useIsMobile";
+import { useI18n } from "@/lib/i18n";
 
 export default function Home() {
   const game = useGoGame("black");
+  const { t } = useI18n();
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    return <MobileGame game={game} />;
+  }
 
   return (
     <main className="page">
@@ -14,12 +23,12 @@ export default function Home() {
           <div className="capture-chip">
             <span className="dot dot-black" />
             <b>{game.state.captures.black}</b>
-            <span>Negres capturen</span>
+            <span>{t("blackCaptures")}</span>
           </div>
           <div className="capture-chip">
             <span className="dot dot-white" />
             <b>{game.state.captures.white}</b>
-            <span>Blanques capturen</span>
+            <span>{t("whiteCaptures")}</span>
           </div>
         </div>
         <div className="board-wrap">
@@ -37,14 +46,10 @@ export default function Home() {
             onClick={game.passTurn}
             disabled={!game.isHumanTurn}
           >
-            Passar
+            {t("pass")}
           </button>
-          <button
-            className="btn"
-            onClick={game.undo}
-            disabled={!game.canUndo}
-          >
-            Desfer
+          <button className="btn" onClick={game.undo} disabled={!game.canUndo}>
+            {t("undo")}
           </button>
         </div>
       </div>
