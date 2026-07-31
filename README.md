@@ -8,6 +8,7 @@ Web app per jugar al **Go en tauler petit (7×7 i 9×9) contra KataGo**. Feta am
 - Tauler en SVG amb textura de fusta i relleu 3D, pedres mates amb textura, coordenades al marge, previsualització en passar el ratolí i marca de l'última jugada.
 - Motor de regles complet: llibertats, captures, **regla del ko**, **prohibició del suïcidi**, passar i final de partida.
 - **Compte per àrea** (estil xinès) amb komi segons la mida al final de la partida.
+- **Fase de recompte** en acabar la partida (dues passades): pots **marcar pedres mortes** tocant-les (es commuta tot el grup connex), es dibuixen atenuades i es tracten com a capturades. El **territori** de cada color es marca amb un quadradet (negre/blanc) a les interseccions buides que envolta un sol color; els punts neutrals (dame) no es marquen. El compte i els marcadors es **recalculen en viu** i hi ha un botó per **finalitzar el recompte** (i reprendre'l). Funciona a desktop i a mòbil.
 - **Selector d'oponent**: bot ràpid (instantani, sense càrrega) o KataGo (sota demanda).
 - **Tema clar/fosc** i partida que **es desa i es reprèn** després d'un refresc.
 - **Trilingüe** (català, castellà, anglès) amb selector d'idioma; i18n propi sense llibreries (`src/lib/i18n.tsx`), textos de les lliçons localitzats a `lessons.ts`.

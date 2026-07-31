@@ -7,6 +7,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import GoBoard from "./GoBoard";
+import Nigiri from "./Nigiri";
+import EyeWarning from "./EyeWarning";
 import { TurnIndicator } from "./GamePanel";
 import { GoGame, BOARD_SIZES } from "@/hooks/useGoGame";
 import { Difficulty } from "@/lib/go/remoteEngine";
@@ -89,6 +91,12 @@ const CapIcon = () => (
   </svg>
 );
 
+const AutoIcon = () => (
+  <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">
+    <path d="M12 6v3l4-4-4-4v3c-4.42 0-8 3.58-8 8 0 1.57.46 3.03 1.24 4.26L6.7 14.8A5.87 5.87 0 0 1 6 12c0-3.31 2.69-6 6-6zm6.76 1.74L17.3 9.2c.44.84.7 1.79.7 2.8 0 3.31-2.69 6-6 6v-3l-4 4 4 4v-3c4.42 0 8-3.58 8-8 0-1.57-.46-3.03-1.24-4.26z" />
+  </svg>
+);
+
 const CloseIcon = () => (
   <svg
     viewBox="0 0 24 24"
@@ -145,6 +153,13 @@ export default function MobileGame({ game }: { game: GoGame }) {
           >
             <NewIcon />
           </button>
+          <button
+            className={`round-btn ${game.autoPlay ? "auto-on" : ""}`}
+            onClick={game.toggleAuto}
+            aria-label={t("auto")}
+          >
+            <AutoIcon />
+          </button>
           <Link href="/aprendre" className="round-btn" aria-label={t("learn")}>
             <CapIcon />
           </Link>
@@ -164,18 +179,21 @@ export default function MobileGame({ game }: { game: GoGame }) {
             })}{" "}
             · {t("margin", { margin: game.score.margin.toFixed(1) })}
           </p>
+          {game.isCounting && (
+            <p className="result-detail">{t("countingInstruction")}</p>
+          )}
         </div>
       )}
 
       <div className="captures-bar">
         <div className="capture-chip">
           <span className="dot dot-black" />
-          <b>{game.state.captures.black}</b>
+          <b>{game.captures.black}</b>
           <span>{t("blackCaptures")}</span>
         </div>
         <div className="capture-chip">
           <span className="dot dot-white" />
-          <b>{game.state.captures.white}</b>
+          <b>{game.captures.white}</b>
           <span>{t("whiteCaptures")}</span>
         </div>
       </div>
@@ -187,20 +205,44 @@ export default function MobileGame({ game }: { game: GoGame }) {
           humanPlayer={game.humanPlayer}
           onPlay={game.playAt}
           hintPoint={game.hint?.point ?? null}
+          territory={game.territory}
+          deadStones={game.deadStones}
+          counting={game.isCounting}
+          onToggleDead={game.toggleDeadAt}
         />
+        <Nigiri game={game} />
+        <EyeWarning game={game} />
       </div>
 
       <div className="board-actions">
-        <button
-          className="btn btn-primary"
-          onClick={game.passTurn}
-          disabled={!game.isHumanTurn}
-        >
-          {t("pass")}
-        </button>
-        <button className="btn" onClick={game.undo} disabled={!game.canUndo}>
-          {t("undo")}
-        </button>
+        {game.state.ended ? (
+          game.isCounting ? (
+            <button className="btn btn-primary" onClick={game.finishCounting}>
+              {t("finishCounting")}
+            </button>
+          ) : (
+            <button className="btn" onClick={game.resumeCounting}>
+              {t("resumeCounting")}
+            </button>
+          )
+        ) : (
+          <>
+            <button
+              className="btn btn-primary"
+              onClick={game.passTurn}
+              disabled={!game.isHumanTurn}
+            >
+              {t("pass")}
+            </button>
+            <button
+              className="btn"
+              onClick={game.undo}
+              disabled={!game.canUndo}
+            >
+              {t("undo")}
+            </button>
+          </>
+        )}
       </div>
 
       {menuOpen && (
@@ -230,6 +272,24 @@ export default function MobileGame({ game }: { game: GoGame }) {
                 {n}×{n}
               </button>
             ))}
+          </div>
+        </div>
+
+        <div className="difficulty opponent-block">
+          <span className="difficulty-label">{t("nigiri")}</span>
+          <div className="difficulty-options opponent-options">
+            <button
+              className={`chip ${!game.nigiriEnabled ? "chip-on" : ""}`}
+              onClick={() => game.setNigiriEnabled(false)}
+            >
+              {t("no")}
+            </button>
+            <button
+              className={`chip ${game.nigiriEnabled ? "chip-on" : ""}`}
+              onClick={() => game.setNigiriEnabled(true)}
+            >
+              {t("yes")}
+            </button>
           </div>
         </div>
 

@@ -162,8 +162,149 @@ body {
 }
 
 .board-wrap {
+  position: relative;
   width: 100%;
   filter: drop-shadow(var(--shadow));
+}
+
+/* ---------- Nigiri ---------- */
+.nigiri-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(1, 20, 28, 0.74);
+  border-radius: 14px;
+}
+
+.nigiri-box {
+  text-align: center;
+  padding: 14px;
+  width: 94%;
+}
+
+.nigiri-instr {
+  margin: 0 0 16px;
+  color: #f3ead9;
+  font-weight: 600;
+  font-size: 14.5px;
+  line-height: 1.4;
+}
+
+.nigiri-bowls {
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+}
+
+.nigiri-bowl {
+  position: relative;
+  width: 128px;
+  height: 128px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 34%, #7a5628, #38280f);
+  border: 2px solid rgba(0, 0, 0, 0.45);
+  box-shadow: inset 0 8px 20px rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 22px 12px 12px;
+}
+
+.bowl-player {
+  cursor: pointer;
+}
+
+.bowl-player:disabled {
+  cursor: default;
+}
+
+.nigiri-bowl-label {
+  position: absolute;
+  top: 18px;
+  left: 0;
+  right: 0;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.nigiri-stones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+  align-content: center;
+  max-width: 96px;
+}
+
+.nigiri-stone {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+}
+
+.nigiri-stone.stone-black {
+  background: radial-gradient(circle at 35% 30%, #5b5b5b, #050505);
+}
+
+.nigiri-stone.stone-white {
+  width: 15px;
+  height: 15px;
+  background: radial-gradient(circle at 35% 30%, #fff, #cbc8bd);
+  border: 1px solid #b7b4aa;
+}
+
+.nigiri-reveal {
+  padding: 9px 14px;
+}
+
+.nigiri-start {
+  margin-top: 16px;
+}
+
+/* ---------- Avís d'ull propi ---------- */
+.eye-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 22;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(1, 20, 28, 0.6);
+  border-radius: 14px;
+}
+
+.eye-box {
+  width: min(88%, 320px);
+  background: var(--panel);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--panel-border);
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.eye-text {
+  margin: 0 0 16px;
+  color: var(--text);
+  font-size: 14.5px;
+  line-height: 1.45;
+}
+
+.eye-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+/* Dins de l'avís, el botó primari no ocupa tota l'amplada */
+.eye-actions .btn-primary {
+  grid-column: auto;
 }
 
 .captures-bar {
@@ -255,6 +396,40 @@ body {
 
 [data-theme="light"] .learn-btn {
   color: #fff;
+}
+
+/* Botó "auto" (mode motor contra motor), al costat del d'aprendre */
+.panel-wrap .auto-btn {
+  position: absolute;
+  top: -58px;
+  right: 56px;
+  z-index: 5;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(120deg, var(--accent-strong), var(--accent));
+  color: #2a1f10;
+  border: 1px solid var(--panel-border);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+}
+
+[data-theme="light"] .auto-btn {
+  color: #fff;
+}
+
+/* Estat actiu del mode auto: anell verd i icona que gira */
+.auto-btn.auto-on,
+.round-btn.auto-on {
+  box-shadow:
+    0 0 0 3px rgba(86, 214, 125, 0.7),
+    0 6px 18px rgba(0, 0, 0, 0.25);
+}
+
+.auto-on svg {
+  animation: spin 1.8s linear infinite;
 }
 
 .panel-header h1 {
@@ -591,6 +766,30 @@ body {
 
 .komi {
   color: var(--text-dim);
+}
+
+/* Nota de la fase de recompte (marcar pedres mortes) */
+.counting-note {
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  border-radius: 12px;
+  background: var(--surface-soft);
+  border: 1px dashed rgba(227, 189, 119, 0.4);
+}
+
+.counting-note strong {
+  display: block;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  margin-bottom: 4px;
+}
+
+.counting-note p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text);
 }
 
 /* ---------- Pista ---------- */

@@ -158,6 +158,35 @@ export const buildPosition = (
   return { ...state, grid, toMove };
 };
 
+// Determina si una intersecció buida és un "ull" del color donat: tots els veïns
+// ortogonals són del color (o vora) i el color també controla prou diagonals.
+// Serveix per avisar quan algú està a punt de jugar dins d'un ull propi.
+export const isEye = (
+  grid: Grid,
+  size: number,
+  index: number,
+  color: Player,
+): boolean => {
+  if (grid[index] !== null) return false;
+  const orth = neighbors(size, index);
+  if (!orth.every((n) => grid[n] === color)) return false;
+
+  const { row, col } = toPoint(size, index);
+  const diagonals = [
+    [row - 1, col - 1],
+    [row - 1, col + 1],
+    [row + 1, col - 1],
+    [row + 1, col + 1],
+  ].filter(([r, c]) => r >= 0 && r < size && c >= 0 && c < size);
+
+  const enemy = opponent(color);
+  const enemyDiagonals = diagonals.filter(
+    ([r, c]) => grid[r * size + c] === enemy,
+  ).length;
+  const onEdge = diagonals.length < 4;
+  return onEdge ? enemyDiagonals === 0 : enemyDiagonals <= 1;
+};
+
 // Comprova si una jugada és legal sense aplicar-la. Retorna null si és legal.
 export const illegalReason = (
   state: GameState,

@@ -47,6 +47,49 @@ const exploreTerritory = (
   return { region, borders };
 };
 
+// Retorna una còpia de la graella amb les pedres mortes retirades (buides).
+// Si no hi ha pedres mortes, retorna la mateixa graella sense copiar.
+const withoutDead = (grid: Grid, dead?: ReadonlySet<number>): Grid => {
+  if (!dead || dead.size === 0) return grid;
+  const next = grid.slice();
+  for (const i of dead) next[i] = null;
+  return next;
+};
+
+// Mapa de propietat del territori: per a cada intersecció buida retorna el color
+// que l'envolta ("black" | "white") o null si és una pedra viva o un punt neutral
+// (dame, que toca els dos colors). Les pedres mortes es tracten com a buides, de
+// manera que el seu lloc compta com a territori del color contrari.
+export const computeTerritory = (
+  grid: Grid,
+  size: number,
+  dead?: ReadonlySet<number>,
+): (Player | null)[] => {
+  const effective = withoutDead(grid, dead);
+  const owners = new Array<Player | null>(grid.length).fill(null);
+  const visited = new Array<boolean>(grid.length).fill(false);
+
+  for (let i = 0; i < effective.length; i++) {
+    if (effective[i] !== null || visited[i]) continue;
+    const { region, borders } = exploreTerritory(effective, size, i, visited);
+    if (borders.size === 1) {
+      const owner = [...borders][0];
+      for (const idx of region) owners[idx] = owner;
+    }
+  }
+
+  return owners;
+};
+
+// Compte per àrea tractant les pedres mortes com a capturades: es retiren de la
+// graella (el seu lloc passa a ser territori del rival) abans de comptar.
+export const scoreAreaWithDead = (
+  grid: Grid,
+  size: number,
+  komi = DEFAULT_KOMI,
+  dead?: ReadonlySet<number>,
+): Score => scoreArea(withoutDead(grid, dead), size, komi);
+
 export const scoreArea = (
   grid: Grid,
   size: number,

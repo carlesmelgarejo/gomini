@@ -15,10 +15,15 @@ interface Props {
   onPlay: (row: number, col: number) => void;
   hintPoint?: Point | null;
   onIllegal?: (reason: string) => void;
+  // Fase de recompte final: marcadors de territori i pedres mortes.
+  territory?: (Player | null)[] | null;
+  deadStones?: ReadonlySet<number>;
+  counting?: boolean;
+  onToggleDead?: (row: number, col: number) => void;
 }
 
 const VIEW = 560;
-const MARGIN = 40;
+const MARGIN = 52;
 const INSET = 7; // marc de fusta al voltant de la superfície de joc
 const COLS = "ABCDEFGHJ"; // columnes A–J sense la I (com als vèrtexs GTP)
 
@@ -43,6 +48,10 @@ export default function GoBoard({
   onPlay,
   hintPoint,
   onIllegal,
+  territory,
+  deadStones,
+  counting = false,
+  onToggleDead,
 }: Props) {
   const { size, grid } = state;
   const step = (VIEW - 2 * MARGIN) / (size - 1);
@@ -51,8 +60,17 @@ export default function GoBoard({
   const coord = (i: number) => MARGIN + i * step;
   // En taulers petits les caselles són més grans; abaixem una mica el radi.
   const stoneR = step * (size <= 7 ? 0.43 : 0.47);
+  const isDead = (i: number) => deadStones?.has(i) ?? false;
 
   const handleClick = (index: number) => {
+    // Durant el recompte, clicar una pedra commuta tot el seu grup (viu/mort).
+    if (counting) {
+      if (grid[index] !== null) {
+        const { row, col } = toPoint(size, index);
+        onToggleDead?.(row, col);
+      }
+      return;
+    }
     if (!isHumanTurn) return;
     const reason = illegalReason(state, index);
     if (reason !== null) {
@@ -227,26 +245,26 @@ export default function GoBoard({
       {/* Coordenades: lletres a dalt/baix, números a esquerra/dreta */}
       <g
         fill="var(--board-line)"
-        opacity={0.6}
-        fontSize={13}
+        opacity={0.72}
+        fontSize={12}
         fontWeight={600}
         textAnchor="middle"
         style={{ pointerEvents: "none" }}
       >
         {Array.from({ length: size }, (_, c) => (
           <g key={`c${c}`}>
-            <text x={coord(c)} y={INSET + 17}>{COLS[c]}</text>
-            <text x={coord(c)} y={VIEW - INSET - 8}>{COLS[c]}</text>
+            <text x={coord(c)} y={16}>{COLS[c]}</text>
+            <text x={coord(c)} y={VIEW - 11}>{COLS[c]}</text>
           </g>
         ))}
         {Array.from({ length: size }, (_, r) => {
           const num = size - r;
           return (
             <g key={`r${r}`}>
-              <text x={INSET + 15} y={coord(r)} dominantBaseline="central">
+              <text x={15} y={coord(r)} dominantBaseline="central">
                 {num}
               </text>
-              <text x={VIEW - INSET - 15} y={coord(r)} dominantBaseline="central">
+              <text x={VIEW - 15} y={coord(r)} dominantBaseline="central">
                 {num}
               </text>
             </g>
@@ -263,7 +281,7 @@ export default function GoBoard({
         return (
           <g key={i}>
             {cell && (
-              <>
+              <g opacity={isDead(i) ? 0.35 : 1}>
                 {/* Cos de la pedra */}
                 <circle
                   cx={cx}
@@ -324,7 +342,7 @@ export default function GoBoard({
                     strokeWidth={2}
                   />
                 )}
-              </>
+              </g>
             )}
 
             {hover === i && hoverPlayable && !cell && (
@@ -344,7 +362,15 @@ export default function GoBoard({
               width={step}
               height={step}
               fill="transparent"
-              style={{ cursor: isHumanTurn && !cell ? "pointer" : "default" }}
+              style={{
+                cursor: counting
+                  ? cell
+                    ? "pointer"
+                    : "default"
+                  : isHumanTurn && !cell
+                    ? "pointer"
+                    : "default",
+              }}
               onMouseEnter={() => setHover(i)}
               onMouseLeave={() => setHover((h) => (h === i ? null : h))}
               onClick={() => handleClick(i)}
@@ -352,6 +378,32 @@ export default function GoBoard({
           </g>
         );
       })}
+
+      {/* Marcadors de territori: quadradet ple a cada intersecció buida que
+          pertany a un color (negre/blanc). Els punts neutrals no es marquen. */}
+      {territory && (
+        <g pointerEvents="none">
+          {territory.map((owner, i) => {
+            if (!owner || grid[i] !== null) return null;
+            const { row, col } = toPoint(size, i);
+            const s = step * 0.22;
+            return (
+              <rect
+                key={`t${i}`}
+                x={coord(col) - s / 2}
+                y={coord(row) - s / 2}
+                width={s}
+                height={s}
+                rx={1}
+                fill={owner === "black" ? "#111" : "#f6f6f6"}
+                stroke={owner === "black" ? "#f6f6f6" : "#111"}
+                strokeWidth={0.8}
+                opacity={0.92}
+              />
+            );
+          })}
+        </g>
+      )}
 
       {/* Marcador de pista (a sobre de tot perquè sempre es vegi) */}
       {hintPoint && (

@@ -32,6 +32,16 @@ export default function GamePanel({ game }: { game: GoGame }) {
 
   return (
     <div className="panel-wrap">
+      <button
+        className={`auto-btn ${game.autoPlay ? "auto-on" : ""}`}
+        onClick={game.toggleAuto}
+        data-tip={t("tipAuto")}
+        aria-label={t("auto")}
+      >
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">
+          <path d="M12 6v3l4-4-4-4v3c-4.42 0-8 3.58-8 8 0 1.57.46 3.03 1.24 4.26L6.7 14.8A5.87 5.87 0 0 1 6 12c0-3.31 2.69-6 6-6zm6.76 1.74L17.3 9.2c.44.84.7 1.79.7 2.8 0 3.31-2.69 6-6 6v-3l-4 4 4 4v-3c4.42 0 8-3.58 8-8 0-1.57-.46-3.03-1.24-4.26z" />
+        </svg>
+      </button>
       <Link href="/aprendre" className="learn-btn" data-tip={t("learn")}>
         <svg
           viewBox="0 0 24 24"
@@ -63,6 +73,24 @@ export default function GamePanel({ game }: { game: GoGame }) {
                 {n}×{n}
               </button>
             ))}
+          </div>
+        </div>
+
+        <div className="difficulty opponent-block">
+          <span className="difficulty-label">{t("nigiri")}</span>
+          <div className="difficulty-options opponent-options">
+            <button
+              className={`chip ${!game.nigiriEnabled ? "chip-on" : ""}`}
+              onClick={() => game.setNigiriEnabled(false)}
+            >
+              {t("no")}
+            </button>
+            <button
+              className={`chip ${game.nigiriEnabled ? "chip-on" : ""}`}
+              onClick={() => game.setNigiriEnabled(true)}
+            >
+              {t("yes")}
+            </button>
           </div>
         </div>
 
@@ -113,9 +141,16 @@ export default function GamePanel({ game }: { game: GoGame }) {
 
         <TurnIndicator game={game} />
 
+        {game.isCounting && (
+          <div className="counting-note">
+            <strong>{t("countingTitle")}</strong>
+            <p>{t("countingInstruction")}</p>
+          </div>
+        )}
+
         {score && (
           <div className="result">
-            <h2>{t("resultTitle")}</h2>
+            <h2>{game.isCounting ? t("countingTitle") : t("resultTitle")}</h2>
             <p className="result-winner">
               {t("resultWinner", { color: t(score.winner) })}
             </p>
