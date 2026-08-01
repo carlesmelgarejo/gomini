@@ -13,7 +13,8 @@ echo "==> Compilant (build standalone)"
 npm run build
 
 echo "==> Copiant estàtics i configuració dins de .next/standalone"
-cp -r .next/static .next/standalone/.next/static
+mkdir -p .next/standalone/.next
+cp -r .next/static .next/standalone/.next/
 cp -r public .next/standalone/public 2>/dev/null || true
 # .env.local conté les variables (PORT, KATAGO_*, etc.). No és al repo.
 cp .env.local .next/standalone/.env.local 2>/dev/null || true
