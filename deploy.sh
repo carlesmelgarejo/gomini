@@ -32,5 +32,8 @@ pm2 save
 
 echo "==> Neteja"
 rm -rf .next/cache
+# El build standalone porta la seva pròpia node_modules a .next/standalone;
+# la de l'arrel només cal per compilar, així que l'alliberem.
+rm -rf node_modules
 
 echo "==> Desplegament complet."
