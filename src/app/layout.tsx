@@ -7,6 +7,8 @@ import { I18nProvider } from "@/lib/i18n";
 export const metadata: Metadata = {
   title: "GoMini — go.elclic.net",
   description: "Joc de Go en tauler petit (7×7 i 9×9) per jugar contra la màquina.",
+  // No indexar als cercadors.
+  robots: { index: false, follow: false },
 };
 
 export const viewport: Viewport = {

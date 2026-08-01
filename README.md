@@ -138,18 +138,73 @@ jugada amb un límit de *visits*. Això evita gestionar estat o desincronitzacio
 i permet canviar la dificultat jugada a jugada. `src/server/katago.ts` manté un
 únic procés de KataGo i hi encua les consultes per `id`.
 
-## Desplegament a Hetzner
+## Desplegament a Hetzner (CloudPanel + PM2 + GitHub Actions)
 
-```bash
-npm run build
-npm start        # port 3000 per defecte
-```
+Mateix patró que ScribaAI: build **standalone** servit amb **PM2** darrere el
+proxy de CloudPanel, i **desplegament automàtic** a cada `push` a `main`.
 
-Posar l'app darrere Nginx (reverse proxy) amb el domini `go.elclic.net` i TLS
-(Let's Encrypt), gestionant el procés amb `pm2` o `systemd`. KataGo viu al mateix
-servidor; assegura't que les variables `KATAGO_*` estiguin definides a l'entorn
-del servei (p. ex. a la unit de systemd).
+Fitxers al repo: `next.config.mjs` (`output: "standalone"`), `ecosystem.config.js`
+(PM2), `deploy.sh` (build + PM2) i `.github/workflows/deploy.yml` (CI/CD).
 
-> Nota: mantenir un procés de KataGo viu consumeix memòria i CPU. En 9x9 amb un
-> model petit i pocs *visits* és assumible en una VPS modesta; puja els *visits*
-> només si el servidor ho aguanta.
+### Preparació del servidor (un sol cop)
+
+1. **CloudPanel:** crear un *Node.js Site* per al domini (p. ex. `gomini.elclic.net`),
+   Node 22, i anotar l'**App Port** assignat. Usuari del site: `gomini` (connecta't
+   sempre per SSH com aquest usuari).
+2. **Node 22 + PM2** via nvm (sense root):
+   ```bash
+   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+   source ~/.nvm/nvm.sh && nvm install 22 && nvm alias default 22
+   npm install -g pm2
+   ```
+3. **Clonar el repo** dins la carpeta del site (repo públic → HTTPS):
+   ```bash
+   cd ~/htdocs/gomini.elclic.net
+   find . -mindepth 1 -delete
+   git clone https://github.com/carlesmelgarejo/gomini.git .
+   ```
+4. **`.env.local`** (no és al repo). Com a mínim el port; KataGo és opcional
+   (sense ell, l'app juga amb el bot ràpid):
+   ```
+   PORT=<App Port del site>
+   # Opcional, només si instal·les KataGo al servidor:
+   # KATAGO_BIN=/opt/katago/katago
+   # KATAGO_MODEL=/opt/katago/models/....bin.gz
+   # KATAGO_CONFIG=/home/gomini/htdocs/gomini.elclic.net/katago-config/analysis.cfg
+   ```
+5. Primer desplegament manual: `bash deploy.sh`.
+6. **SSL** Let's Encrypt des de CloudPanel. El proxy de CloudPanel ja redirigeix
+   al `PORT`; no cal tocar `client_max_body_size` (no hi ha pujades grans).
+7. **Persistència PM2:** `pm2 save` (el fa `deploy.sh`) + `pm2 startup` si vols
+   resurrecció al reinici.
+
+### Desplegament automàtic (GitHub Actions)
+
+1. **Clau SSH de desplegament** dedicada (com a usuari `gomini`):
+   ```bash
+   ssh-keygen -t ed25519 -f ~/deploy_key -N ""
+   cat ~/deploy_key.pub >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys
+   cat ~/deploy_key   # la PRIVADA → secret de GitHub
+   ```
+2. **Secrets del repo** (Settings → Secrets and variables → Actions):
+   - `SSH_HOST`: IP del servidor · `SSH_USER`: `gomini` · `SSH_PORT`: `22`
+   - `SSH_KEY`: contingut de la clau **privada** (`~/deploy_key`)
+   - `PROJECT_DIR`: `/home/gomini/htdocs/gomini.elclic.net`
+3. A partir d'aquí, cada `push` a `main` desplega sol (entra per SSH, fa
+   `git reset --hard origin/main` i `bash deploy.sh`). També es pot llançar a mà
+   des de la pestanya *Actions*.
+
+> El workflow **no conté secrets** (viuen a GitHub Secrets). `.env.local` està al
+> `.gitignore` i no es toca mai en desplegar.
+
+## No indexació
+
+`src/app/robots.ts` bloqueja tots els cercadors i la metadada de `layout.tsx`
+inclou `robots: { index: false, follow: false }`, així GoMini **no s'indexa**.
+
+## KataGo al servidor (opcional)
+
+KataGo NO cal per desplegar: sense les variables `KATAGO_*`, l'app juga amb el bot
+ràpid. Si vols KataGo en producció, instal·la'l al servidor (CPU/Eigen + model
+petit) i defineix les `KATAGO_*` al `.env.local`. Mantenir un procés de KataGo viu
+consumeix memòria i CPU; en 9×9 amb un model petit és assumible.
