@@ -1,52 +1,52 @@
 # GoMini — gomini.elclic.net
 
-Web app per jugar al **Go en tauler petit (7×7 i 9×9) contra KataGo**. Feta amb **Next.js 15 (App Router) + TypeScript**, sense dependències de UI externes: el tauler és SVG i les regles estan escrites en TypeScript. L'oponent és **KataGo** (motor d'anàlisi) darrere una API route, amb un bot ràpid com a alternativa lleugera.
+A web app for playing **Go on small boards (7×7 and 9×9) against KataGo**. Built with **Next.js 15 (App Router) + TypeScript**, with no external UI dependencies: the board is SVG and the rules are written in TypeScript. The opponent is **KataGo** (analysis engine) behind an API route, with a fast bot as a lightweight fallback.
 
-## Què fa
+## What it does
 
-- **Selector de tauler 7×7 / 9×9** (el motor és genèric en la mida; komi 9 en 7×7 i 7 en 9×9).
-- Tauler en SVG amb textura de fusta i relleu 3D, pedres mates amb textura, coordenades al marge, previsualització en passar el ratolí i marca de l'última jugada.
-- Motor de regles complet: llibertats, captures, **regla del ko**, **prohibició del suïcidi**, passar i final de partida.
-- **Compte per àrea** (estil xinès) amb komi segons la mida al final de la partida.
-- **Fase de recompte** en acabar la partida (dues passades): pots **marcar pedres mortes** tocant-les (es commuta tot el grup connex), es dibuixen atenuades i es tracten com a capturades. El **territori** de cada color es marca amb un quadradet (negre/blanc) a les interseccions buides que envolta un sol color; els punts neutrals (dame) no es marquen. El compte i els marcadors es **recalculen en viu** i hi ha un botó per **finalitzar el recompte** (i reprendre'l). Funciona a desktop i a mòbil.
-- **Selector d'oponent**: bot ràpid (instantani, sense càrrega) o KataGo (sota demanda).
-- **Tema clar/fosc** i partida que **es desa i es reprèn** després d'un refresc.
-- **Trilingüe** (català, castellà, anglès) amb selector d'idioma; i18n propi sense llibreries (`src/lib/i18n.tsx`), textos de les lliçons localitzats a `lessons.ts`.
-- Oponent **KataGo** amb **dificultat ajustable** (Fàcil / Mitjà / Difícil → menys o més _visits_).
-- **Bot heurístic de reserva**: si KataGo no està configurat o no respon, l'app segueix jugable amb un oponent senzill en TypeScript. Quan KataGo hi és, mana ell.
-- **Botó de pista**: ressalta al tauler la millor jugada segons KataGo i mostra la seva valoració (probabilitat de guanyar, punts esperats i seqüència prevista).
-- **Tutorial interactiu** (`/aprendre`): 13 lliçons pas a pas amb posicions preparades, validades amb el motor de regles. Fonaments (llibertats, captura, cadenes, atari, doble atari, ko), formes i tècnica (estendre's/nobi, hane, connectar punts de tall, boca del tigre, triangle buit, dos ulls) i estratègia (cantonades primer, obertura en 9×9).
-- Controls: passar, pista, desfer, nova partida.
-- **Tema clar/fosc** amb un toggle (☀️/🌙) que recorda la teva preferència. Tauler amb textura de fusta i relleu 3D, pedres glossy.
+- **7×7 / 9×9 board selector** (the engine is size-agnostic; komi 9 on 7×7 and 7 on 9×9).
+- SVG board with wood texture and 3D relief, matte textured stones, coordinate labels on the margin, hover preview and a last-move marker.
+- Full rules engine: liberties, captures, **ko rule**, **suicide ban**, passing and game end.
+- **Area scoring** (Chinese style) with size-based komi at the end of the game.
+- **Counting phase** when the game ends (two passes): you can **mark dead stones** by tapping them (the whole connected group toggles), they are drawn dimmed and treated as captured. Each color's **territory** is marked with a small square (black/white) on empty intersections surrounded by a single color; neutral points (dame) are not marked. The score and markers are **recalculated live** and there is a button to **finish the count** (and resume it). Works on desktop and mobile.
+- **Opponent selector**: fast bot (instant, no load) or KataGo (on demand).
+- **Light/dark theme** and a game that is **saved and resumed** after a refresh.
+- **Trilingual** (Catalan, Spanish, English) with a language selector; custom i18n with no libraries (`src/lib/i18n.tsx`), lesson texts localized in `lessons.ts`.
+- **KataGo** opponent with **adjustable difficulty** (Easy / Medium / Hard → fewer or more *visits*).
+- **Heuristic fallback bot**: if KataGo is not configured or does not respond, the app stays playable with a simple TypeScript opponent. When KataGo is present, it takes over.
+- **Hint button**: highlights KataGo's best move on the board and shows its evaluation (win probability, expected points and the predicted sequence).
+- **Interactive tutorial** (`/aprendre`): 13 step-by-step lessons with prepared positions, validated against the rules engine. Fundamentals (liberties, capture, chains, atari, double atari, ko), shapes and technique (extending/nobi, hane, connecting cutting points, tiger's mouth, empty triangle, two eyes) and strategy (corners first, 9×9 opening).
+- Controls: pass, hint, undo, new game.
+- **Light/dark theme** with a toggle (☀️/🌙) that remembers your preference. Board with wood texture and 3D relief, glossy stones.
 
-## Executar en local
+## Run locally
 
 ```bash
 npm install
 npm run dev      # http://localhost:3000
 ```
 
-Sense configurar KataGo ja pots jugar (bot de reserva). Per activar KataGo, mira
-la secció següent.
+You can play without configuring KataGo (fallback bot). To enable KataGo, see the
+next section.
 
-## Configurar KataGo
+## Configuring KataGo
 
-> **KataGo NO és als repositoris d'Ubuntu** (`apt install katago` falla). S'instal·la
-> baixant un binari precompilat de GitHub. En CPU (sense GPU) es fa servir la build
-> **Eigen**; en processadors moderns, la variant **eigenavx2** és més ràpida.
+> **KataGo is NOT in the Ubuntu repositories** (`apt install katago` fails). You install it
+> by downloading a precompiled binary from GitHub. On CPU (no GPU) you use the
+> **Eigen** build; on modern processors, the **eigenavx2** variant is faster.
 
-### Opció ràpida: script
+### Quick option: script
 
 ```bash
 bash scripts/install-katago.sh
 ```
 
-Baixa la build de CPU (eigenavx2) de KataGo v1.16.4 i un model, els deixa a
-`/opt/katago` i t'imprimeix les variables d'entorn a posar al `.env.local`.
+Downloads the CPU build (eigenavx2) of KataGo v1.16.4 and a model, places them in
+`/opt/katago` and prints the environment variables to add to your `.env.local`.
 
-### Opció manual
+### Manual option
 
-1. **Binari** (CPU, AVX2) — [releases de KataGo](https://github.com/lightvector/KataGo/releases):
+1. **Binary** (CPU, AVX2) — [KataGo releases](https://github.com/lightvector/KataGo/releases):
 
    ```bash
    cd /opt && sudo mkdir -p katago && cd katago
@@ -55,156 +55,156 @@ Baixa la build de CPU (eigenavx2) de KataGo v1.16.4 i un model, els deixa a
    ./katago version
    ```
 
-   Si dona `Illegal instruction`, fes servir la build `katago-v1.16.4-eigen-linux-x64.zip`
-   (compatible amb qualsevol CPU).
+   If it throws `Illegal instruction`, use the `katago-v1.16.4-eigen-linux-x64.zip`
+   build (compatible with any CPU).
 
-2. **Model** (xarxa neuronal):
+2. **Model** (neural network):
 
    ```bash
    sudo mkdir -p /opt/katago/models && cd /opt/katago/models
    sudo wget https://github.com/lightvector/KataGo/releases/download/v1.4.5/g170e-b20c256x2-s5303129600-d1228401921.bin.gz
    ```
 
-   Per gastar **menys RAM** (recomanat en portàtils), fes servir un net més petit
-   (b10 o b6): en 9×9 juga de sobres i n'hi ha a la pàgina de xarxes de
-   [katagotraining.org](https://katagotraining.org/networks). Nets grans (b20, b40)
-   juguen més fort però gasten força més memòria.
+   To use **less RAM** (recommended on laptops), use a smaller net
+   (b10 or b6): on 9×9 it plays more than well enough, and there are some on the
+   networks page at [katagotraining.org](https://katagotraining.org/networks). Large nets
+   (b20, b40) play stronger but use much more memory.
 
-3. **Variables d'entorn** (copia `.env.example` a `.env.local`):
+3. **Environment variables** (copy `.env.example` to `.env.local`):
 
    ```
    KATAGO_BIN=/opt/katago/katago
    KATAGO_MODEL=/opt/katago/models/g170e-b20c256x2-s5303129600-d1228401921.bin.gz
-   KATAGO_CONFIG=/ruta/al/repo/katago-config/analysis.cfg
+   KATAGO_CONFIG=/path/to/repo/katago-config/analysis.cfg
    ```
 
-   El fitxer `katago-config/analysis.cfg` ja ve al repo amb valors base per a CPU/9x9.
+   The `katago-config/analysis.cfg` file ships with the repo with base values for CPU/9x9.
 
-4. Reinicia `npm run dev` (o l'app en producció). Al panell hauràs de veure que
-   l'oponent és **KataGo** en comptes del bot de reserva.
+4. Restart `npm run dev` (or the app in production). In the panel you should see the
+   opponent is now **KataGo** instead of the fallback bot.
 
-### Dificultat
+### Difficulty
 
-La força es controla amb el nombre de _visits_ de KataGo per jugada
+Strength is controlled by KataGo's number of *visits* per move
 (`src/lib/go/remoteEngine.ts`):
 
-| Nivell  | visits | Notes                                 |
-| ------- | ------ | ------------------------------------- |
-| Fàcil   | 8      | ràpid i assequible                    |
-| Mitjà   | 80     | equilibrat                            |
-| Difícil | 600    | fort; més CPU i uns segons per jugada |
+| Level  | visits | Notes                                   |
+|--------|--------|-----------------------------------------|
+| Easy   | 8      | fast and accessible                     |
+| Medium | 80     | balanced                                |
+| Hard   | 600    | strong; more CPU and a few seconds/move |
 
-Ajusta aquests números al gust segons la potència del teu Hetzner.
+Tune these numbers to taste depending on your Hetzner's power.
 
-## Estructura
+## Structure
 
 ```
 src/
   app/
-    layout.tsx            html base (ca) i metadades
-    page.tsx              pàgina principal (client)
-    globals.css           estil (tema fusta fosc, modern)
-    aprendre/page.tsx     pàgina del tutorial interactiu
-    api/move/route.ts     API: rep la partida i torna la jugada de KataGo
-    api/hint/route.ts     API: jugada recomanada + valoració (pista)
-    api/engine/route.ts   API: comprova si KataGo està disponible
+    layout.tsx            base html (ca) and metadata
+    page.tsx              main page (client)
+    globals.css           styles (dark wood theme, modern)
+    aprendre/page.tsx     interactive tutorial page
+    api/move/route.ts     API: receives the game and returns KataGo's move
+    api/hint/route.ts     API: recommended move + evaluation (hint)
+    api/engine/route.ts   API: checks whether KataGo is available
   components/
-    GoBoard.tsx           tauler SVG interactiu (pedres, hover, pista)
-    GamePanel.tsx         motor, dificultat, pista, captures, resultat, controls
-    Tutorial.tsx          tutorial interactiu (lliçons + validació)
+    GoBoard.tsx           interactive SVG board (stones, hover, hint)
+    GamePanel.tsx         engine, difficulty, hint, captures, result, controls
+    Tutorial.tsx          interactive tutorial (lessons + validation)
   hooks/
-    useGoGame.ts          orquestra la partida, el torn de la màquina i les pistes
+    useGoGame.ts          orchestrates the game, the machine's turn and hints
   lib/go/
-    types.ts              tipus (Player, Move, Score…)
-    board.ts              motor de tauler: grups, captures, ko, suïcidi, historial
-    scoring.ts            compte per àrea + komi
-    engine.ts             interfície GoEngine + bot heurístic (reserva)
-    remoteEngine.ts       client KataGo (compleix GoEngine) + dificultat + pistes
-    vertex.ts             conversió punt intern ↔ vèrtex GTP ("E5")
-    lessons.ts            contingut de les lliçons del tutorial
+    types.ts              types (Player, Move, Score…)
+    board.ts              board engine: groups, captures, ko, suicide, history
+    scoring.ts            area scoring + komi
+    engine.ts             GoEngine interface + heuristic bot (fallback)
+    remoteEngine.ts       KataGo client (implements GoEngine) + difficulty + hints
+    vertex.ts             internal point ↔ GTP vertex conversion ("E5")
+    lessons.ts            tutorial lesson content
   server/
-    katago.ts             gestor del procés `katago analysis` (només servidor)
+    katago.ts             manager of the `katago analysis` process (server only)
 katago-config/
-  analysis.cfg            config base del motor d'anàlisi
+  analysis.cfg            base analysis-engine config
 ```
 
-La lògica de regles (`lib/go`) no depèn de React i es pot provar de manera aïllada.
+The rules logic (`lib/go`) does not depend on React and can be tested in isolation.
 
-## Com parla amb KataGo
+## How it talks to KataGo
 
-L'app fa servir el **motor d'anàlisi** de KataGo (`katago analysis`), no el GTP:
-és _stateless_, així que cada jugada envia la partida sencera i demana la millor
-jugada amb un límit de _visits_. Això evita gestionar estat o desincronitzacions,
-i permet canviar la dificultat jugada a jugada. `src/server/katago.ts` manté un
-únic procés de KataGo i hi encua les consultes per `id`.
+The app uses KataGo's **analysis engine** (`katago analysis`), not GTP:
+it is *stateless*, so every move sends the whole game and asks for the best
+move with a *visits* limit. This avoids managing state or desyncs,
+and lets you change difficulty move by move. `src/server/katago.ts` keeps a
+single KataGo process and queues queries by `id`.
 
-## Desplegament a Hetzner (CloudPanel + PM2 + GitHub Actions)
+## Deployment to Hetzner (CloudPanel + PM2 + GitHub Actions)
 
-Mateix patró que ScribaAI: build **standalone** servit amb **PM2** darrere el
-proxy de CloudPanel, i **desplegament automàtic** a cada `push` a `main`.
+Same pattern as ScribaAI: **standalone** build served with **PM2** behind the
+CloudPanel proxy, and **automatic deployment** on every `push` to `main`.
 
-Fitxers al repo: `next.config.mjs` (`output: "standalone"`), `ecosystem.config.js`
-(PM2), `deploy.sh` (build + PM2) i `.github/workflows/deploy.yml` (CI/CD).
+Repo files: `next.config.mjs` (`output: "standalone"`), `ecosystem.config.js`
+(PM2), `deploy.sh` (build + PM2) and `.github/workflows/deploy.yml` (CI/CD).
 
-### Preparació del servidor (un sol cop)
+### Server preparation (one-time)
 
-1. **CloudPanel:** crear un _Node.js Site_ per al domini (p. ex. `gomini.elclic.net`),
-   Node 22, i anotar l'**App Port** assignat. Usuari del site: `gomini` (connecta't
-   sempre per SSH com aquest usuari).
-2. **Node 22 + PM2** via nvm (sense root):
+1. **CloudPanel:** create a *Node.js Site* for the domain (e.g. `gomini.elclic.net`),
+   Node 22, and note the assigned **App Port**. Site user: `gomini` (always
+   connect over SSH as this user).
+2. **Node 22 + PM2** via nvm (no root):
    ```bash
    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
    source ~/.nvm/nvm.sh && nvm install 22 && nvm alias default 22
    npm install -g pm2
    ```
-3. **Clonar el repo** dins la carpeta del site (repo públic → HTTPS):
+3. **Clone the repo** into the site folder (public repo → HTTPS):
    ```bash
    cd ~/htdocs/gomini.elclic.net
    find . -mindepth 1 -delete
    git clone https://github.com/carlesmelgarejo/gomini.git .
    ```
-4. **`.env.local`** (no és al repo). Com a mínim el port; KataGo és opcional
-   (sense ell, l'app juga amb el bot ràpid):
+4. **`.env.local`** (not in the repo). At minimum the port; KataGo is optional
+   (without it, the app plays with the fast bot):
    ```
-   PORT=<App Port del site>
-   # Opcional, només si instal·les KataGo al servidor:
+   PORT=<site App Port>
+   # Optional, only if you install KataGo on the server:
    # KATAGO_BIN=/opt/katago/katago
    # KATAGO_MODEL=/opt/katago/models/....bin.gz
    # KATAGO_CONFIG=/home/gomini/htdocs/gomini.elclic.net/katago-config/analysis.cfg
    ```
-5. Primer desplegament manual: `bash deploy.sh`.
-6. **SSL** Let's Encrypt des de CloudPanel. El proxy de CloudPanel ja redirigeix
-   al `PORT`; no cal tocar `client_max_body_size` (no hi ha pujades grans).
-7. **Persistència PM2:** `pm2 save` (el fa `deploy.sh`) + `pm2 startup` si vols
-   resurrecció al reinici.
+5. First manual deployment: `bash deploy.sh`.
+6. **SSL** Let's Encrypt from CloudPanel. The CloudPanel proxy already redirects
+   to `PORT`; no need to touch `client_max_body_size` (there are no large uploads).
+7. **PM2 persistence:** `pm2 save` (done by `deploy.sh`) + `pm2 startup` if you want
+   resurrection on reboot.
 
-### Desplegament automàtic (GitHub Actions)
+### Automatic deployment (GitHub Actions)
 
-1. **Clau SSH de desplegament** dedicada (com a usuari `gomini`):
+1. **Dedicated deployment SSH key** (as user `gomini`):
    ```bash
    ssh-keygen -t ed25519 -f ~/deploy_key -N ""
    cat ~/deploy_key.pub >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys
-   cat ~/deploy_key   # la PRIVADA → secret de GitHub
+   cat ~/deploy_key   # the PRIVATE key → GitHub secret
    ```
-2. **Secrets del repo** (Settings → Secrets and variables → Actions):
-   - `SSH_HOST`: IP del servidor · `SSH_USER`: `gomini` · `SSH_PORT`: `22`
-   - `SSH_KEY`: contingut de la clau **privada** (`~/deploy_key`)
+2. **Repo secrets** (Settings → Secrets and variables → Actions):
+   - `SSH_HOST`: server IP · `SSH_USER`: `gomini` · `SSH_PORT`: `22`
+   - `SSH_KEY`: contents of the **private** key (`~/deploy_key`)
    - `PROJECT_DIR`: `/home/gomini/htdocs/gomini.elclic.net`
-3. A partir d'aquí, cada `push` a `main` desplega sol (entra per SSH, fa
-   `git reset --hard origin/main` i `bash deploy.sh`). També es pot llançar a mà
-   des de la pestanya _Actions_.
+3. From then on, every `push` to `main` deploys on its own (SSH in, runs
+   `git reset --hard origin/main` and `bash deploy.sh`). It can also be triggered
+   manually from the *Actions* tab.
 
-> El workflow **no conté secrets** (viuen a GitHub Secrets). `.env.local` està al
-> `.gitignore` i no es toca mai en desplegar.
+> The workflow **contains no secrets** (they live in GitHub Secrets). `.env.local` is in
+> `.gitignore` and is never touched during deployment.
 
-## No indexació
+## No indexing
 
-`src/app/robots.ts` bloqueja tots els cercadors i la metadada de `layout.tsx`
-inclou `robots: { index: false, follow: false }`, així GoMini **no s'indexa**.
+`src/app/robots.ts` blocks all crawlers and the metadata in `layout.tsx`
+includes `robots: { index: false, follow: false }`, so GoMini is **not indexed**.
 
-## KataGo al servidor (opcional)
+## KataGo on the server (optional)
 
-KataGo NO cal per desplegar: sense les variables `KATAGO_*`, l'app juga amb el bot
-ràpid. Si vols KataGo en producció, instal·la'l al servidor (CPU/Eigen + model
-petit) i defineix les `KATAGO_*` al `.env.local`. Mantenir un procés de KataGo viu
-consumeix memòria i CPU; en 9×9 amb un model petit és assumible.
+KataGo is NOT required to deploy: without the `KATAGO_*` variables, the app plays with
+the fast bot. If you want KataGo in production, install it on the server (CPU/Eigen +
+small model) and set the `KATAGO_*` variables in `.env.local`. Keeping a KataGo process
+alive uses memory and CPU; on 9×9 with a small model it is manageable.
