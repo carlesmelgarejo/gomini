@@ -1,4 +1,4 @@
-# GoMini — go.elclic.net
+# GoMini — gomini.elclic.net
 
 Web app per jugar al **Go en tauler petit (7×7 i 9×9) contra KataGo**. Feta amb **Next.js 15 (App Router) + TypeScript**, sense dependències de UI externes: el tauler és SVG i les regles estan escrites en TypeScript. L'oponent és **KataGo** (motor d'anàlisi) darrere una API route, amb un bot ràpid com a alternativa lleugera.
 
@@ -12,7 +12,7 @@ Web app per jugar al **Go en tauler petit (7×7 i 9×9) contra KataGo**. Feta am
 - **Selector d'oponent**: bot ràpid (instantani, sense càrrega) o KataGo (sota demanda).
 - **Tema clar/fosc** i partida que **es desa i es reprèn** després d'un refresc.
 - **Trilingüe** (català, castellà, anglès) amb selector d'idioma; i18n propi sense llibreries (`src/lib/i18n.tsx`), textos de les lliçons localitzats a `lessons.ts`.
-- Oponent **KataGo** amb **dificultat ajustable** (Fàcil / Mitjà / Difícil → menys o més *visits*).
+- Oponent **KataGo** amb **dificultat ajustable** (Fàcil / Mitjà / Difícil → menys o més _visits_).
 - **Bot heurístic de reserva**: si KataGo no està configurat o no respon, l'app segueix jugable amb un oponent senzill en TypeScript. Quan KataGo hi és, mana ell.
 - **Botó de pista**: ressalta al tauler la millor jugada segons KataGo i mostra la seva valoració (probabilitat de guanyar, punts esperats i seqüència prevista).
 - **Tutorial interactiu** (`/aprendre`): 13 lliçons pas a pas amb posicions preparades, validades amb el motor de regles. Fonaments (llibertats, captura, cadenes, atari, doble atari, ko), formes i tècnica (estendre's/nobi, hane, connectar punts de tall, boca del tigre, triangle buit, dos ulls) i estratègia (cantonades primer, obertura en 9×9).
@@ -85,14 +85,14 @@ Baixa la build de CPU (eigenavx2) de KataGo v1.16.4 i un model, els deixa a
 
 ### Dificultat
 
-La força es controla amb el nombre de *visits* de KataGo per jugada
+La força es controla amb el nombre de _visits_ de KataGo per jugada
 (`src/lib/go/remoteEngine.ts`):
 
-| Nivell  | visits | Notes                                  |
-|---------|--------|----------------------------------------|
-| Fàcil   | 8      | ràpid i assequible                     |
-| Mitjà   | 80     | equilibrat                             |
-| Difícil | 600    | fort; més CPU i uns segons per jugada  |
+| Nivell  | visits | Notes                                 |
+| ------- | ------ | ------------------------------------- |
+| Fàcil   | 8      | ràpid i assequible                    |
+| Mitjà   | 80     | equilibrat                            |
+| Difícil | 600    | fort; més CPU i uns segons per jugada |
 
 Ajusta aquests números al gust segons la potència del teu Hetzner.
 
@@ -133,8 +133,8 @@ La lògica de regles (`lib/go`) no depèn de React i es pot provar de manera aï
 ## Com parla amb KataGo
 
 L'app fa servir el **motor d'anàlisi** de KataGo (`katago analysis`), no el GTP:
-és *stateless*, així que cada jugada envia la partida sencera i demana la millor
-jugada amb un límit de *visits*. Això evita gestionar estat o desincronitzacions,
+és _stateless_, així que cada jugada envia la partida sencera i demana la millor
+jugada amb un límit de _visits_. Això evita gestionar estat o desincronitzacions,
 i permet canviar la dificultat jugada a jugada. `src/server/katago.ts` manté un
 únic procés de KataGo i hi encua les consultes per `id`.
 
@@ -148,7 +148,7 @@ Fitxers al repo: `next.config.mjs` (`output: "standalone"`), `ecosystem.config.j
 
 ### Preparació del servidor (un sol cop)
 
-1. **CloudPanel:** crear un *Node.js Site* per al domini (p. ex. `gomini.elclic.net`),
+1. **CloudPanel:** crear un _Node.js Site_ per al domini (p. ex. `gomini.elclic.net`),
    Node 22, i anotar l'**App Port** assignat. Usuari del site: `gomini` (connecta't
    sempre per SSH com aquest usuari).
 2. **Node 22 + PM2** via nvm (sense root):
@@ -192,7 +192,7 @@ Fitxers al repo: `next.config.mjs` (`output: "standalone"`), `ecosystem.config.j
    - `PROJECT_DIR`: `/home/gomini/htdocs/gomini.elclic.net`
 3. A partir d'aquí, cada `push` a `main` desplega sol (entra per SSH, fa
    `git reset --hard origin/main` i `bash deploy.sh`). També es pot llançar a mà
-   des de la pestanya *Actions*.
+   des de la pestanya _Actions_.
 
 > El workflow **no conté secrets** (viuen a GitHub Secrets). `.env.local` està al
 > `.gitignore` i no es toca mai en desplegar.
