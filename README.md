@@ -1,4 +1,4 @@
-# GoMini — gomini.elclic.net
+# GoMini
 
 A web app for playing **Go on small boards (7×7 and 9×9) against KataGo**. Built with **Next.js 15 (App Router) + TypeScript**, with no external UI dependencies: the board is SVG and the rules are written in TypeScript. The opponent is **KataGo** (analysis engine) behind an API route, with a fast bot as a lightweight fallback.
 
@@ -12,7 +12,7 @@ A web app for playing **Go on small boards (7×7 and 9×9) against KataGo**. Bui
 - **Opponent selector**: fast bot (instant, no load) or KataGo (on demand).
 - **Light/dark theme** and a game that is **saved and resumed** after a refresh.
 - **Trilingual** (Catalan, Spanish, English) with a language selector; custom i18n with no libraries (`src/lib/i18n.tsx`), lesson texts localized in `lessons.ts`.
-- **KataGo** opponent with **adjustable difficulty** (Easy / Medium / Hard → fewer or more *visits*).
+- **KataGo** opponent with **adjustable difficulty** (Easy / Medium / Hard → fewer or more _visits_).
 - **Heuristic fallback bot**: if KataGo is not configured or does not respond, the app stays playable with a simple TypeScript opponent. When KataGo is present, it takes over.
 - **Hint button**: highlights KataGo's best move on the board and shows its evaluation (win probability, expected points and the predicted sequence).
 - **Interactive tutorial** (`/aprendre`): 13 step-by-step lessons with prepared positions, validated against the rules engine. Fundamentals (liberties, capture, chains, atari, double atari, ko), shapes and technique (extending/nobi, hane, connecting cutting points, tiger's mouth, empty triangle, two eyes) and strategy (corners first, 9×9 opening).
@@ -85,11 +85,11 @@ Downloads the CPU build (eigenavx2) of KataGo v1.16.4 and a model, places them i
 
 ### Difficulty
 
-Strength is controlled by KataGo's number of *visits* per move
+Strength is controlled by KataGo's number of _visits_ per move
 (`src/lib/go/remoteEngine.ts`):
 
 | Level  | visits | Notes                                   |
-|--------|--------|-----------------------------------------|
+| ------ | ------ | --------------------------------------- |
 | Easy   | 8      | fast and accessible                     |
 | Medium | 80     | balanced                                |
 | Hard   | 600    | strong; more CPU and a few seconds/move |
@@ -133,8 +133,8 @@ The rules logic (`lib/go`) does not depend on React and can be tested in isolati
 ## How it talks to KataGo
 
 The app uses KataGo's **analysis engine** (`katago analysis`), not GTP:
-it is *stateless*, so every move sends the whole game and asks for the best
-move with a *visits* limit. This avoids managing state or desyncs,
+it is _stateless_, so every move sends the whole game and asks for the best
+move with a _visits_ limit. This avoids managing state or desyncs,
 and lets you change difficulty move by move. `src/server/katago.ts` keeps a
 single KataGo process and queues queries by `id`.
 
@@ -148,7 +148,7 @@ Repo files: `next.config.mjs` (`output: "standalone"`), `ecosystem.config.js`
 
 ### Server preparation (one-time)
 
-1. **CloudPanel:** create a *Node.js Site* for the domain (e.g. `gomini.elclic.net`),
+1. **CloudPanel:** create a _Node.js Site_ for the domain,
    Node 22, and note the assigned **App Port**. Site user: `gomini` (always
    connect over SSH as this user).
 2. **Node 22 + PM2** via nvm (no root):
@@ -159,7 +159,7 @@ Repo files: `next.config.mjs` (`output: "standalone"`), `ecosystem.config.js`
    ```
 3. **Clone the repo** into the site folder (public repo → HTTPS):
    ```bash
-   cd ~/htdocs/gomini.elclic.net
+   cd ~/htdocs/<domain>
    find . -mindepth 1 -delete
    git clone https://github.com/carlesmelgarejo/gomini.git .
    ```
@@ -170,7 +170,7 @@ Repo files: `next.config.mjs` (`output: "standalone"`), `ecosystem.config.js`
    # Optional, only if you install KataGo on the server:
    # KATAGO_BIN=/opt/katago/katago
    # KATAGO_MODEL=/opt/katago/models/....bin.gz
-   # KATAGO_CONFIG=/home/gomini/htdocs/gomini.elclic.net/katago-config/analysis.cfg
+   # KATAGO_CONFIG=/home/gomini/htdocs/<domain>/katago-config/analysis.cfg
    ```
 5. First manual deployment: `bash deploy.sh`.
 6. **SSL** Let's Encrypt from CloudPanel. The CloudPanel proxy already redirects
@@ -189,10 +189,10 @@ Repo files: `next.config.mjs` (`output: "standalone"`), `ecosystem.config.js`
 2. **Repo secrets** (Settings → Secrets and variables → Actions):
    - `SSH_HOST`: server IP · `SSH_USER`: `gomini` · `SSH_PORT`: `22`
    - `SSH_KEY`: contents of the **private** key (`~/deploy_key`)
-   - `PROJECT_DIR`: `/home/gomini/htdocs/gomini.elclic.net`
+   - `PROJECT_DIR`: `/home/gomini/htdocs/<domain>`
 3. From then on, every `push` to `main` deploys on its own (SSH in, runs
    `git reset --hard origin/main` and `bash deploy.sh`). It can also be triggered
-   manually from the *Actions* tab.
+   manually from the _Actions_ tab.
 
 > The workflow **contains no secrets** (they live in GitHub Secrets). `.env.local` is in
 > `.gitignore` and is never touched during deployment.
