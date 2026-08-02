@@ -61,6 +61,6 @@ KATAGO_MODEL=$DEST/models/$MODEL
 KATAGO_CONFIG=<RUTA_AL_REPO>/katago-config/analysis.cfg
 
 (KATAGO_CONFIG ha d'apuntar al fitxer del repo:
- /home/carles/Repositori/go.elclic.net/katago-config/analysis.cfg)
+ <RUTA_AL_REPO>/katago-config/analysis.cfg)
 ===========================================================
 EOF
